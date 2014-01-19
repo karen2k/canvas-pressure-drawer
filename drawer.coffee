@@ -76,17 +76,18 @@ window.drawer = (canvas) ->
     canvas.addEventListener 'mousedown', onCanvasMouseDown
 
   onCanvasMouseDown = (e) ->
-    createNewSpline e.offsetX, e.offsetY
+    createNewSpline e.clientX, e.clientY
     document.addEventListener 'mouseup', onCanvasMouseUp
     canvas.addEventListener 'mousemove', onCanvasMouseMove
 
   onCanvasMouseUp = (e) ->
     document.removeEventListener 'mouseup', onCanvasMouseUp
     canvas.removeEventListener 'mousemove', onCanvasMouseMove
-    finishCurrentSpline e.offsetX, e.offsetY
+    finishCurrentSpline e.clientX, e.clientY
 
   onCanvasMouseMove = (e) ->
-    pushPoint e.offsetX, e.offsetY
+    
+    pushPoint e.clientX, e.clientY
 
   # utils
   finishCurrentSpline = (x, y) ->
@@ -116,10 +117,21 @@ window.drawer = (canvas) ->
     canvas.style.top = '0'
     canvas.style.zIndex = '3'
 
-  pushPoint = (x, y, clear = true) ->
-    x = x * canvasWidth / canvas.offsetWidth
-    y = y * canvasHeight / canvas.offsetHeight
+  pushPoint = (clientX, clientY, clear = true) ->
+    
+    # Compute all the transforms and offsets
+    rect = canvas.getBoundingClientRect()
+    canvasLeft = rect.left
+    canvasTop = rect.top
+    scale = rect.width / canvas.width
+    
+    # We use clientX instead of pageX because
+    # pageX changes when the document is scrolled down from the 0 scroll
+    x = (clientX - canvasLeft) / scale
+    y = (clientY - canvasTop) / scale
+
     pressure = (if penAPI then Math.round(penAPI.pressure * 10) else 1)
+    
     splines.current().push {x:x, y:y, p:pressure} unless splines.current().length > 0 and splines.current().current().x == x and splines.current().current().y == y
     redrawCanvas clear
 
