@@ -57,7 +57,7 @@ window.drawer = (canvas_container_id) ->
 
   # utils
   finishCurrentSpline = (x, y) ->
-    context.putImageData context_cache.getImageData(0, 0, canvas.offsetWidth, canvas.offsetHeight), 0, 0
+    context.putImageData context_cache.getImageData(0, 0, canvasWidth, canvasHeight), 0, 0
     pushPoint x, y, false
     canvas_container.removeChild canvas_cache
   
@@ -73,7 +73,7 @@ window.drawer = (canvas_container_id) ->
     canvas_cache.style.zIndex = '2'
     canvas_container.appendChild canvas_cache
     context_cache = canvas_cache.getContext '2d'
-    context_cache.putImageData context.getImageData(0, 0, canvas.offsetWidth, canvas.offsetHeight), 0, 0
+    context_cache.putImageData context.getImageData(0, 0, canvasWidth, canvasHeight), 0, 0
 
   pushPoint = (x, y, clear = true) ->
     x = x * canvasWidth / canvas.offsetWidth
@@ -82,7 +82,7 @@ window.drawer = (canvas_container_id) ->
     redrawCanvas clear
 
   redrawCanvas = (clear = true) ->
-    context.clearRect(0, 0, 640, 480) if clear
+    context.clearRect(0, 0, canvasWidth, canvasHeight) if clear
     # redrawSpline i for i in [0..splines.length-1]
     redrawSpline splines.length - 1
 
