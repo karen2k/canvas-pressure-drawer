@@ -23,6 +23,11 @@ window.drawer = (canvas) ->
   canvasHeight = 0
   penAPI = null
 
+  # tmp vars
+  timer = 0
+  timerMin = 50
+  # tmp vars  
+
   # helpers
   p = (m) ->
     console.log m if logging
@@ -86,7 +91,10 @@ window.drawer = (canvas) ->
     finishCurrentSpline e.clientX, e.clientY
 
   onCanvasMouseMove = (e) ->
-    
+    # tmp restriction
+    return if ((new Date()).getTime() - timer) < timerMin
+    timer = (new Date()).getTime()
+    # tmp restriction
     pushPoint e.clientX, e.clientY
 
   # utils
@@ -148,11 +156,41 @@ window.drawer = (canvas) ->
 
     for i in [1..splines[spline_num].length-1]
       context.beginPath()
-      context.moveTo splines[spline_num][i-1].x, splines[spline_num][i-1].y
-      midPoint = middlePoint splines[spline_num][i-1], splines[spline_num][i]
-      context.quadraticCurveTo midPoint.x, midPoint.y, splines[spline_num][i].x, splines[spline_num][i].y
+      # context.moveTo splines[spline_num][i-1].x, splines[spline_num][i-1].y
+      # midPoint = middlePoint splines[spline_num][i-1], splines[spline_num][i]
+      # context.quadraticCurveTo midPoint.x, midPoint.y, splines[spline_num][i].x, splines[spline_num][i].y
+
+      for i in [1..splines[spline_num].length-3]
+        xA = splines[spline_num][i - 1].x
+        xB = splines[spline_num][i].x
+        xC = splines[spline_num][i + 1].x
+        xD = splines[spline_num][i + 2].x
+
+        yA = splines[spline_num][i - 1].y
+        yB = splines[spline_num][i].y
+        yC = splines[spline_num][i + 1].y
+        yD = splines[spline_num][i + 2].y
+
+        a3 = (-xA + 3 * (xB - xC) + xD) / 6.0
+        a2 = (xA - 2 * xB + xC) / 2.0
+        a1 = (xC - xA) / 2.0
+        a0 = (xA + 4 * xB + xC) / 6.0
+        b3 = (-yA + 3 * (yB - yC) + yD) / 6.0
+        b2 = (yA - 2 * yB + yC) / 2.0
+        b1 = (yC - yA) / 2.0
+        b0 = (yA + 4 * yB + yC) / 6.0
+
+
+        # for (j = 0; j <= N; j++)
+        for j in [0..5]
+          # t from 0 to 1
+          t = j / 5
+          x = (((a3 * t + a2) * t + a1) * t + a0)
+          y = (((b3 * t + b2) * t + b1) * t + b0)
+          context.lineTo x, y
+
       context.strokeStyle = strokeStyle
-      context.lineWidth = splines[spline_num][i].p
+      context.lineWidth = 1#splines[spline_num][i].p
       context.lineCap = 'round'
       context.stroke()    
 
