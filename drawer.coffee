@@ -18,7 +18,7 @@ window.drawer = (canvas_container_id) ->
   prevX = 0
   prevY = 0
   splines = []
-  strokeStyle = 'black'
+  strokeStyle = 'white'
   canvasWidth = 0
   canvasHeight = 0
 
@@ -92,8 +92,6 @@ window.drawer = (canvas_container_id) ->
   redrawSpline = (spline_num) ->
     return unless splines[spline_num].length > 3
 
-    strokeStyle = 'white'
-
     context.beginPath()
     context.moveTo splines[spline_num][0].x, splines[spline_num][0].y
 
@@ -105,6 +103,9 @@ window.drawer = (canvas_container_id) ->
     context.lineWidth = 2
     context.lineCap = 'round'
     context.stroke()    
+
+  toDataURL = ->
+    context.toDataURL()
 
 
   # construct me
