@@ -11,12 +11,4 @@ body{
     position:relative;
     z-index:1;
   }
-
-  canvas{
-    display:block;
-    width:100%;
-    position:absolute;
-    top:0;
-    z-index:3;
-  }
 }

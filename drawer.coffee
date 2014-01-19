@@ -31,6 +31,7 @@ window.drawer = (canvas) ->
   # construct
   __construct = ->
     canvas_container = canvas.parentNode
+    setCanvasStyles canvas
     # canvas = canvas_container.getElementsByTagName('canvas')[0]
     canvasWidth = parseInt canvas.getAttribute 'width'
     canvasHeight = parseInt canvas.getAttribute 'height'
@@ -70,10 +71,18 @@ window.drawer = (canvas) ->
     canvas_cache = document.createElement 'canvas'
     canvas_cache.setAttribute 'width', canvasWidth
     canvas_cache.setAttribute 'height', canvasHeight
+    setCanvasStyles canvas_cache
     canvas_cache.style.zIndex = '2'
     canvas_container.appendChild canvas_cache
     context_cache = canvas_cache.getContext '2d'
     context_cache.putImageData context.getImageData(0, 0, canvasWidth, canvasHeight), 0, 0
+
+  setCanvasStyles = (canvas) ->
+    canvas.style.display = 'block'
+    canvas.style.width = '100%'
+    canvas.style.position = 'absolute'
+    canvas.style.top = '0'
+    canvas.style.zIndex = '3'
 
   pushPoint = (x, y, clear = true) ->
     x = x * canvasWidth / canvas.offsetWidth
