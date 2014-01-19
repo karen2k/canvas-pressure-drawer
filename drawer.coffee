@@ -3,14 +3,14 @@ Array::current =
     @[@length - 1] if @length > 0
 
 
-window.drawer = (canvas_container_id) ->
+window.drawer = (canvas) ->
 
   # remember this
   t = @
 
   # local variables
   canvas_container = null
-  canvas = null
+  # canvas = null
   canvas_cache = null
   context = null
   context_cache = null
@@ -30,8 +30,8 @@ window.drawer = (canvas_container_id) ->
 
   # construct
   __construct = ->
-    canvas_container = id canvas_container_id
-    canvas = canvas_container.getElementsByTagName('canvas')[0]
+    canvas_container = canvas.parentNode
+    # canvas = canvas_container.getElementsByTagName('canvas')[0]
     canvasWidth = parseInt canvas.getAttribute 'width'
     canvasHeight = parseInt canvas.getAttribute 'height'
     context = canvas.getContext '2d'

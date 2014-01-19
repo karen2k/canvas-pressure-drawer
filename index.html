@@ -5,13 +5,13 @@
   <link href="/drawer/drawer.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-  <div class="canvas_container" id="drawonme">
+  <div class="canvas_container">
     <img src="/drawer/tmp.png">
-    <canvas width="640" height="480">
+    <canvas width="640" height="480" id="drawonme">
   </div>
   <script src="/drawer/drawer.js" type="text/javascript"></script>
   <script type="text/javascript">
-    window.drawer('drawonme');
+    window.drawer(document.getElementById('drawonme'));
   </script>
 </body>
 </html>
