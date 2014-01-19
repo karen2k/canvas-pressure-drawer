@@ -138,7 +138,7 @@ window.drawer = (canvas) ->
     x = (clientX - canvasLeft) / scale
     y = (clientY - canvasTop) / scale
 
-    pressure = (if penAPI then Math.round(penAPI.pressure * 5) else 1)
+    pressure = (if penAPI then .5 + Math.round((penAPI.pressure - .1) * 10) else 1)
     
     splines.current().push {x:x, y:y, p:pressure} unless splines.current().length > 0 and splines.current().current().x == x and splines.current().current().y == y
     redrawCanvas clear
