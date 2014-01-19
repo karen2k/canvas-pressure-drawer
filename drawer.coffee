@@ -68,10 +68,10 @@ window.drawer = (canvas_container_id) ->
 
   cacheCanvasCurrentState = ->
     canvas_cache = document.createElement 'canvas'
-    canvas_container.appendChild canvas_cache
     canvas_cache.setAttribute 'width', canvasWidth
     canvas_cache.setAttribute 'height', canvasHeight
     canvas_cache.style.zIndex = '2'
+    canvas_container.appendChild canvas_cache
     context_cache = canvas_cache.getContext '2d'
     context_cache.putImageData context.getImageData(0, 0, canvas.offsetWidth, canvas.offsetHeight), 0, 0
 
