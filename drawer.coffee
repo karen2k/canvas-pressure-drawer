@@ -25,7 +25,7 @@ window.drawer = (canvas) ->
 
   # tmp vars
   timer = 0
-  timerMin = 50
+  timerMin = 100
   # tmp vars  
 
   # helpers
@@ -190,7 +190,7 @@ window.drawer = (canvas) ->
           context.lineTo x, y
 
       context.strokeStyle = strokeStyle
-      context.lineWidth = 1#splines[spline_num][i].p
+      context.lineWidth = splines[spline_num][i].p
       context.lineCap = 'round'
       context.stroke()    
 
