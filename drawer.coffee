@@ -162,38 +162,26 @@ window.drawer = (canvas) ->
     for i in [1..splines[spline_num].length-3]
       context.beginPath()
 
-      xA = splines[spline_num][i - 1].x
-      xB = splines[spline_num][i].x
-      xC = splines[spline_num][i + 1].x
-      xD = splines[spline_num][i + 2].x
+      [a3, a2, a1, a0, b3, b2, b1, b0] = getCoordinates spline_num, i
 
-      yA = splines[spline_num][i - 1].y
-      yB = splines[spline_num][i].y
-      yC = splines[spline_num][i + 1].y
-      yD = splines[spline_num][i + 2].y
-
-      a3 = (-xA + 3 * (xB - xC) + xD) / 6.0
-      a2 = (xA - 2 * xB + xC) / 2.0
-      a1 = (xC - xA) / 2.0
-      a0 = (xA + 4 * xB + xC) / 6.0
-      b3 = (-yA + 3 * (yB - yC) + yD) / 6.0
-      b2 = (yA - 2 * yB + yC) / 2.0
-      b1 = (yC - yA) / 2.0
-      b0 = (yA + 4 * yB + yC) / 6.0
-
-
-      # for (j = 0; j <= N; j++)
-      for j in [0..5]
-        # t from 0 to 1
-        t = j / 5
-        x = (((a3 * t + a2) * t + a1) * t + a0)
-        y = (((b3 * t + b2) * t + b1) * t + b0)
-        context.lineTo x, y
+      context.lineTo (((a3 * (t = j / 5) + a2) * t + a1) * t + a0), (((b3 * t + b2) * t + b1) * t + b0) for j in [0..5]
 
       context.strokeStyle = strokeStyle
       context.lineWidth = splines[spline_num][i].p
       context.lineCap = 'round'
       context.stroke() 
+
+  getCoordinates = (spline_num, i) ->
+    [
+      (-splines[spline_num][i - 1].x + 3 * (splines[spline_num][i].x - splines[spline_num][i + 1].x) + splines[spline_num][i + 2].x) / 6.0
+      (splines[spline_num][i - 1].x - 2 * splines[spline_num][i].x + splines[spline_num][i + 1].x) / 2.0
+      (splines[spline_num][i + 1].x - splines[spline_num][i - 1].x) / 2.0
+      (splines[spline_num][i - 1].x + 4 * splines[spline_num][i].x + splines[spline_num][i + 1].x) / 6.0
+      (-splines[spline_num][i - 1].y + 3 * (splines[spline_num][i].y - splines[spline_num][i + 1].y) + splines[spline_num][i + 2].y) / 6.0
+      (splines[spline_num][i - 1].y - 2 * splines[spline_num][i].y + splines[spline_num][i + 1].y) / 2.0
+      (splines[spline_num][i + 1].y - splines[spline_num][i - 1].y) / 2.0
+      (splines[spline_num][i - 1].y + 4 * splines[spline_num][i].y + splines[spline_num][i + 1].y) / 6.0
+    ]
 
   toDataURL = ->
     context.toDataURL()
@@ -201,3 +189,5 @@ window.drawer = (canvas) ->
 
   # construct me
   __construct()
+  
+  return @
