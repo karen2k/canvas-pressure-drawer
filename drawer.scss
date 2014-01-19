@@ -1,10 +1,22 @@
 body{
-  background:grey;
+  background:black;
+  margin:0;
+  padding:100px 0 0 0;
 }
-.canvas{
-  background:#900;
-  margin:100px auto 0 auto;
-  display:block;
-  width:640px;
-  height:480px;
+.canvas_container{
+  position:relative;
+
+  img{
+    width:100%;
+    position:relative;
+    z-index:1;
+  }
+
+  canvas{
+    display:block;
+    width:100%;
+    position:absolute;
+    top:0;
+    z-index:3;
+  }
 }

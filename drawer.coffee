@@ -1,26 +1,26 @@
-Array.prototype.last = 
+Array::current = 
   ->
-    @[@length - 1] # if @length > 0
+    @[@length - 1] if @length > 0
 
 
-window.drawer = (canvas_id) ->
+window.drawer = (canvas_container_id) ->
 
   # remember this
-  t = this
+  t = @
 
   # local variables
+  canvas_container = null
   canvas = null
+  canvas_cache = null
   context = null
+  context_cache = null
   logging = true
   prevX = 0
   prevY = 0
-  points = []
+  splines = []
   strokeStyle = 'black'
-
-  # tmp vars
-  timer = 0
-  timerMin = 0
-  # tmp vars  
+  canvasWidth = 0
+  canvasHeight = 0
 
   # helpers
   p = (m) ->
@@ -30,7 +30,10 @@ window.drawer = (canvas_id) ->
 
   # construct
   __construct = ->
-    canvas = id canvas_id
+    canvas_container = id canvas_container_id
+    canvas = canvas_container.getElementsByTagName('canvas')[0]
+    canvasWidth = parseInt canvas.getAttribute 'width'
+    canvasHeight = parseInt canvas.getAttribute 'height'
     context = canvas.getContext '2d'
     addCanvasEventsListeners()
 
@@ -40,94 +43,69 @@ window.drawer = (canvas_id) ->
     canvas.addEventListener 'mousedown', onCanvasMouseDown
 
   onCanvasMouseDown = (e) ->
-    setPrevXY e.offsetX, e.offsetY
+    createNewSpline e.offsetX, e.offsetY
     document.addEventListener 'mouseup', onCanvasMouseUp
     canvas.addEventListener 'mousemove', onCanvasMouseMove
 
   onCanvasMouseUp = (e) ->
     document.removeEventListener 'mouseup', onCanvasMouseUp
     canvas.removeEventListener 'mousemove', onCanvasMouseMove
+    finishCurrentSpline e.offsetX, e.offsetY
 
   onCanvasMouseMove = (e) ->
-    # tmp restriction
-    return if ((new Date()).getTime() - timer) < timerMin
-    timer = (new Date()).getTime()
-    # tmp restriction
-
     pushPoint e.offsetX, e.offsetY
-    setPrevXY e.offsetX, e.offsetY
 
   # utils
-  setPrevXY = (x, y) ->
-    [prevX, prevY]= [x, y]
+  finishCurrentSpline = (x, y) ->
+    context.putImageData context_cache.getImageData(0, 0, canvas.offsetWidth, canvas.offsetHeight), 0, 0
+    pushPoint x, y, false
+    canvas_container.removeChild canvas_cache
+  
+  createNewSpline = (x, y) ->
+    cacheCanvasCurrentState()
+    splines.push []
+    pushPoint x, y
 
-  pushPoint = (x, y) ->
-    prevPoint = points.last()
-    points.push {x:x, y:y}
-    reDrawSpline()
+  cacheCanvasCurrentState = ->
+    canvas_cache = document.createElement 'canvas'
+    canvas_container.appendChild canvas_cache
+    canvas_cache.setAttribute 'width', canvasWidth
+    canvas_cache.setAttribute 'height', canvasHeight
+    canvas_cache.style.zIndex = '2'
+    context_cache = canvas_cache.getContext '2d'
+    context_cache.putImageData context.getImageData(0, 0, canvas.offsetWidth, canvas.offsetHeight), 0, 0
 
-  reDrawSpline = ->
-    return unless points.length > 1
-    context.clearRect(0, 0, 640, 480)
-    # strokeStyle = 'black'
-    # for i in [1..points.length-1]
-    #   drawLine points[i-1].x, points[i-1].y, points[i].x, points[i].y
+  pushPoint = (x, y, clear = true) ->
+    x = x * canvasWidth / canvas.offsetWidth
+    y = y * canvasHeight / canvas.offsetHeight
+    splines.current().push {x:x, y:y} unless splines.current().length > 0 and splines.current().current().x == x and splines.current().current().y == y
+    redrawCanvas clear
 
-    N = 30
+  redrawCanvas = (clear = true) ->
+    context.clearRect(0, 0, 640, 480) if clear
+    # redrawSpline i for i in [0..splines.length-1]
+    redrawSpline splines.length - 1
+
+  middlePoint = (p1, p2) ->
+    return { x: p1.x + (p2.x - p1.x) / 2, y: p1.y + (p2.y - p1.y) / 2 }
+
+  redrawSpline = (spline_num) ->
+    return unless splines[spline_num].length > 3
+
     strokeStyle = 'white'
 
     context.beginPath()
-    context.moveTo points[0].x, points[0].y
+    context.moveTo splines[spline_num][0].x, splines[spline_num][0].y
 
-    for i in [1..points.length-3]
-      xA = points[i - 1].x
-      xB = points[i].x
-      xC = points[i + 1].x
-      xD = points[i + 2].x
-
-      yA = points[i - 1].y
-      yB = points[i].y
-      yC = points[i + 1].y
-      yD = points[i + 2].y
-
-      a3 = (-xA + 3 * (xB - xC) + xD) / 6.0
-      a2 = (xA - 2 * xB + xC) / 2.0
-      a1 = (xC - xA) / 2.0
-      a0 = (xA + 4 * xB + xC) / 6.0
-      b3 = (-yA + 3 * (yB - yC) + yD) / 6.0
-      b2 = (yA - 2 * yB + yC) / 2.0
-      b1 = (yC - yA) / 2.0
-      b0 = (yA + 4 * yB + yC) / 6.0
-
-    
-      # for (j = 0; j <= N; j++)
-      for j in [0..N]
-        # t from 0 to 1
-        t = j / N
-
-        x = (((a3 * t + a2) * t + a1) * t + a0)
-        y = (((b3 * t + b2) * t + b1) * t + b0)
-
-        context.lineTo x, y
+    for i in [1..splines[spline_num].length-1]
+      midPoint = middlePoint splines[spline_num][i-1], splines[spline_num][i]
+      context.quadraticCurveTo splines[spline_num][i-1].x, splines[spline_num][i-1].y, midPoint.x, midPoint.y
 
     context.strokeStyle = strokeStyle
     context.lineWidth = 2
     context.lineCap = 'round'
-    context.stroke()
+    context.stroke()    
 
-  drawLine = (x0, y0, x1, y1) ->
-
-    controlX = x0 + (x1 - x0) / 2
-    controlY = y0 + (y1 - y0) / 2
-
-    context.beginPath()
-    context.moveTo x0, y0
-    # context.lineTo x1, y1
-    context.quadraticCurveTo controlX, controlY, x1, y1
-    context.strokeStyle = strokeStyle
-    context.lineWidth = 2
-    context.lineCap = 'round'
-    context.stroke()
 
   # construct me
   __construct()

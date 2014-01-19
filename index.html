@@ -5,7 +5,10 @@
   <link href="/drawer/drawer.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-  <canvas id="drawonme" class="canvas" width="640" height="480">
+  <div class="canvas_container" id="drawonme">
+    <img width="640" src="/drawer/tmp.png">
+    <canvas width="640" height="480">
+  </div>
   <script src="/drawer/drawer.js" type="text/javascript"></script>
   <script type="text/javascript">
     window.drawer('drawonme');
