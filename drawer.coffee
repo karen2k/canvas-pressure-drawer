@@ -130,7 +130,7 @@ window.drawer = (canvas) ->
     x = (clientX - canvasLeft) / scale
     y = (clientY - canvasTop) / scale
 
-    pressure = (if penAPI then Math.round(penAPI.pressure * 10) else 1)
+    pressure = (if penAPI then Math.round(penAPI.pressure * 5) else 1)
     
     splines.current().push {x:x, y:y, p:pressure} unless splines.current().length > 0 and splines.current().current().x == x and splines.current().current().y == y
     redrawCanvas clear
@@ -150,9 +150,9 @@ window.drawer = (canvas) ->
       context.beginPath()
       context.moveTo splines[spline_num][i-1].x, splines[spline_num][i-1].y
       midPoint = middlePoint splines[spline_num][i-1], splines[spline_num][i]
-      context.quadraticCurveTo splines[spline_num][i-1].x, splines[spline_num][i-1].y, midPoint.x, midPoint.y
+      context.quadraticCurveTo midPoint.x, midPoint.y, splines[spline_num][i].x, splines[spline_num][i].y
       context.strokeStyle = strokeStyle
-      context.lineWidth = splines[spline_num][i-1].p
+      context.lineWidth = splines[spline_num][i].p
       context.lineCap = 'round'
       context.stroke()    
 
