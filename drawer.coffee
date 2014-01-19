@@ -21,6 +21,7 @@ window.drawer = (canvas) ->
   strokeStyle = 'white'
   canvasWidth = 0
   canvasHeight = 0
+  penAPI = null
 
   # helpers
   p = (m) ->
@@ -36,7 +37,38 @@ window.drawer = (canvas) ->
     canvasWidth = parseInt canvas.getAttribute 'width'
     canvasHeight = parseInt canvas.getAttribute 'height'
     context = canvas.getContext '2d'
-    addCanvasEventsListeners()
+    initWacom()
+    addCanvasEventsListeners()    
+
+  initWacom = ->
+    pluginHTML = """
+      <!--[if IE]>
+
+      <object id='wtPlugin' classid='CLSID:092dfa86-5807-5a94-bf3b-5a53ba9e5308' width='1' height='1' style="position:fixed; top: 0px; left: 0px">
+      </object>
+
+      <![endif]--><!--[if !IE]> <-->
+
+      <object id="wtPlugin" type="application/x-wacomtabletplugin" width='1' height='1' style="position:fixed; top: 0px; left: 0px">
+  	    <!-- <param name="onload" value="pluginLoaded" /> -->
+      </object>
+
+      <!--> <![endif]-->
+    """
+    ###
+      Detect Wacom pressure support. Code should look approximately so:
+    ###
+    wacomPlugin = document.getElementById('wtPlugin')
+    if not wacomPlugin
+      holder = document.createElement("div")
+      holder.innerHTML = pluginHTML
+      document.body.appendChild(holder)
+      wacomPlugin = document.getElementById('wtPlugin')
+  
+    penAPI = wacomPlugin.penAPI
+  
+    if penAPI
+      console.debug "Wacom detected"
 
 
   # events
@@ -87,7 +119,8 @@ window.drawer = (canvas) ->
   pushPoint = (x, y, clear = true) ->
     x = x * canvasWidth / canvas.offsetWidth
     y = y * canvasHeight / canvas.offsetHeight
-    splines.current().push {x:x, y:y} unless splines.current().length > 0 and splines.current().current().x == x and splines.current().current().y == y
+    pressure = (if penAPI then Math.round(penAPI.pressure * 10) else 1)
+    splines.current().push {x:x, y:y, p:pressure} unless splines.current().length > 0 and splines.current().current().x == x and splines.current().current().y == y
     redrawCanvas clear
 
   redrawCanvas = (clear = true) ->
@@ -101,17 +134,15 @@ window.drawer = (canvas) ->
   redrawSpline = (spline_num) ->
     return unless splines[spline_num].length > 3
 
-    context.beginPath()
-    context.moveTo splines[spline_num][0].x, splines[spline_num][0].y
-
     for i in [1..splines[spline_num].length-1]
+      context.beginPath()
+      context.moveTo splines[spline_num][i-1].x, splines[spline_num][i-1].y
       midPoint = middlePoint splines[spline_num][i-1], splines[spline_num][i]
       context.quadraticCurveTo splines[spline_num][i-1].x, splines[spline_num][i-1].y, midPoint.x, midPoint.y
-
-    context.strokeStyle = strokeStyle
-    context.lineWidth = 2
-    context.lineCap = 'round'
-    context.stroke()    
+      context.strokeStyle = strokeStyle
+      context.lineWidth = splines[spline_num][i-1].p
+      context.lineCap = 'round'
+      context.stroke()    
 
   toDataURL = ->
     context.toDataURL()
