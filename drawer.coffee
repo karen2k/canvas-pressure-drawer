@@ -144,7 +144,9 @@ window.drawer = (canvas) ->
     redrawCanvas clear
 
   redrawCanvas = (clear = true) ->
-    context.clearRect(0, 0, canvasWidth, canvasHeight) if clear
+    rect = canvas.getBoundingClientRect()
+    scale = rect.width / canvas.width
+    context.clearRect(0, 0, canvasWidth * scale, canvasHeight * scale) if clear
     # redrawSpline i for i in [0..splines.length-1]
     redrawSpline splines.length - 1
 
